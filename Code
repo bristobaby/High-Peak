@@ -1,0 +1,73 @@
+import java.io.*;
+import java.util.*;
+//userdefined data type to store Items
+class Item {
+  String name;
+  int price;
+  
+  //parameterized constructors
+  public Item(String name, int price) {
+    this.name = name;
+    this.price = price;
+  }
+
+  public String toString() { 
+      return this.name + ": " + this.price;
+  }
+}
+
+//Driver class
+public class Main {
+  public static void main(String[] args) throws Exception {
+    FileInputStream fileinst=new FileInputStream("input.txt");       
+    Scanner sr=new Scanner(fileinst);
+    //read first line of inputfile and parse it to obtain number of employees
+    int number_of_employees = Integer.parseInt(sr.nextLine().split(": ")[1]);
+    //skip next three line 
+    sr.nextLine(); sr.nextLine(); sr.nextLine();
+
+    //ArrayList to store all items in input file
+    ArrayList<Item> goodies_items = new ArrayList<Item>();
+
+    //read from file till end
+    while(sr.hasNextLine())  
+    { 
+      //parse the line to get item name and price
+      String current[] = sr.nextLine().split(": ");
+      //create new item and add it to Item Arraylist
+      goodies_items.add(new Item(current[0], Integer.parseInt(current[1])));
+    }
+    sr.close();
+
+    //sort the arrayList of items in ascending order based on price of items
+    Collections.sort(goodies_items, new Comparator<Item>(){
+      public int compare(Item a, Item b) { 
+        return a.price - b.price; 
+      } 
+    });
+
+    //set min_diff as price of last item i Arraylist
+    int md = goodies_items.get(goodies_items.size()-1).price;
+    int mi = 0;
+    for(int i=0;i<goodies_items.size()-number_of_employees+1;i++) {
+      //calculate min difference
+      int diff = goodies_items.get(number_of_employees+i-1).price-goodies_items.get(i).price;
+      //if calcualted min diff less than previous min diff
+      if(diff<=md) {
+        md = diff;
+        mi = i;
+      }
+    }
+    
+    
+    //copy the ouput to file
+    FileWriter fw = new FileWriter("output.txt");
+    fw.write("The goodies selected for distribution are:\n\n");
+    for(int i=mi;i<mi + number_of_employees; i++) {
+      fw.write(goodies_items.get(i).toString() + "\n");
+    }
+
+    fw.write("\nAnd the difference between the chosen goodie with highest price and the lowest price is " + md);
+	  fw.close();
+  }
+}
